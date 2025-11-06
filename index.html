@@ -8,61 +8,72 @@
 </head>
 <body style="font-family: Arial, sans-serif; background:#f8f9fa; display:flex; flex-direction:column; align-items:center; margin:0; padding:20px;">
 
-<div style="max-width:400px; width:100%; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+<div style="max-width:450px; width:100%; background:white; padding:20px; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
   <h2 style="text-align:center; margin-top:0;">Shipping Slip Generator<br><span style="font-size:16px;">Zardoz By Anas Traders</span></h2>
 
-  <div style="border:1px solid #ddd; padding:15px; border-radius:10px;">
-    <h3 style="color:#007bff; margin-top:0;">Shipping Slip</h3>
-
+  <!-- Slip 1 -->
+  <div style="border:1px solid #ddd; padding:15px; border-radius:10px; margin-bottom:15px;">
+    <h3 style="color:#007bff; margin-top:0;">Slip 1 Details</h3>
     <label style="font-weight:bold;">Name</label>
-    <input id="name" type="text" placeholder="Enter Name" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
+    <input id="name1" type="text" placeholder="Enter Name" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
 
     <label style="font-weight:bold;">Address</label>
-    <textarea id="address" rows="3" placeholder="Enter Address" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;"></textarea>
+    <textarea id="address1" rows="3" placeholder="Enter Address" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;"></textarea>
 
     <label style="font-weight:bold;">Mobile Number</label>
-    <input id="mobile" type="text" placeholder="Enter Mobile Number(s)" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
+    <input id="mobile1" type="text" placeholder="Enter Mobile Number(s)" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
   </div>
 
-  <div style="margin-top:15px;">
-    <button onclick="addSlip()" style="width:100%; background:#28a745; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; margin-bottom:10px;">＋ Add New Slip</button>
-    <button onclick="printSlips()" style="width:100%; background:#ff5722; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; margin-bottom:10px;">🖨️ Print Slips</button>
-    <button onclick="shareSlips()" style="width:100%; background:#007bff; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold;">📤 Share Slips</button>
+  <!-- Slip 2 -->
+  <div style="border:1px solid #ddd; padding:15px; border-radius:10px;">
+    <h3 style="color:#007bff; margin-top:0;">Slip 2 Details</h3>
+    <label style="font-weight:bold;">Name</label>
+    <input id="name2" type="text" placeholder="Enter Name" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
+
+    <label style="font-weight:bold;">Address</label>
+    <textarea id="address2" rows="3" placeholder="Enter Address" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;"></textarea>
+
+    <label style="font-weight:bold;">Mobile Number</label>
+    <input id="mobile2" type="text" placeholder="Enter Mobile Number(s)" style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ccc; border-radius:6px;">
+  </div>
+
+  <div style="margin-top:20px;">
+    <button onclick="printOrShare('print')" style="width:100%; background:#ff5722; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold; margin-bottom:10px;">🖨️ Print Slips</button>
+    <button onclick="printOrShare('share')" style="width:100%; background:#007bff; color:white; padding:10px; border:none; border-radius:6px; font-weight:bold;">📤 Share PDF</button>
   </div>
 </div>
 
 <!-- Hidden slips container -->
-<div id="slipContainer" style="display:none; width:100%; text-align:center; margin-top:30px;"></div>
+<div id="slipContainer" style="display:none; text-align:center; margin-top:30px;"></div>
 
 <script>
-let slips = [];
+function getSlipData() {
+  const slips = [];
+  const fields = [
+    { name: 'name1', address: 'address1', mobile: 'mobile1' },
+    { name: 'name2', address: 'address2', mobile: 'mobile2' }
+  ];
 
-function addSlip() {
-  const name = document.getElementById('name').value.trim();
-  const address = document.getElementById('address').value.trim();
-  const mobile = document.getElementById('mobile').value.trim();
-
-  if (!name || !address || !mobile) {
-    alert("Please fill all fields!");
-    return;
-  }
-
-  slips.push({ name, address, mobile });
-  alert("Slip added successfully!");
-  document.getElementById('name').value = '';
-  document.getElementById('address').value = '';
-  document.getElementById('mobile').value = '';
+  fields.forEach(f => {
+    const name = document.getElementById(f.name).value.trim();
+    const address = document.getElementById(f.address).value.trim();
+    const mobile = document.getElementById(f.mobile).value.trim();
+    if (name && address && mobile) {
+      slips.push({ name, address, mobile });
+    }
+  });
+  return slips;
 }
 
-function generateSlipHTML() {
+function generateSlipHTML(slips) {
   const date = new Date();
-  const istTime = new Date(date.getTime() + (5.5 * 60 * 60 * 1000));
+  const istTime = new Date(date.getTime());
   const formattedTime = istTime.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
 
   let html = '';
-  slips.forEach((s, i) => {
+  slips.forEach((s) => {
     html += `
-      <div style="width:60%; margin:30px auto; border:1px solid #000; padding:20px; text-align:left; position:relative; min-height:300px;">
+      <div style="width:60%; margin:0 auto; border:1px solid #000; padding:20px; text-align:left; position:relative; height:400px; box-sizing:border-box;">
         <span style="position:absolute; top:5px; right:10px; font-size:10px;">${formattedTime}</span>
         <h3 style="text-align:center; margin:0;">Shipping Slip</h3>
         <p><b>Name:</b> ${s.name}</p>
@@ -75,48 +86,53 @@ function generateSlipHTML() {
   return html;
 }
 
-async function printSlips() {
-  if (slips.length === 0) return alert("No slips to print!");
-  document.getElementById("slipContainer").innerHTML = generateSlipHTML();
-  document.getElementById("slipContainer").style.display = "block";
+async function printOrShare(action) {
+  const slips = getSlipData();
+  if (slips.length === 0) {
+    alert("Please fill at least one slip!");
+    return;
+  }
 
-  window.print();
-  document.getElementById("slipContainer").style.display = "none";
-}
-
-async function shareSlips() {
-  if (slips.length === 0) return alert("No slips to share!");
-
-  document.getElementById("slipContainer").innerHTML = generateSlipHTML();
+  document.getElementById("slipContainer").innerHTML = generateSlipHTML(slips);
   document.getElementById("slipContainer").style.display = "block";
 
   const element = document.getElementById("slipContainer");
-  const canvas = await html2canvas(element, { scale:2 });
+  const canvas = await html2canvas(element, { scale: 2 });
   const imgData = canvas.toDataURL('image/png');
 
   const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF('l', 'pt', 'a4'); // landscape
+  const pdf = new jsPDF('p', 'pt', 'a4'); // portrait
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth * 0.75;
+  const imgWidth = pageWidth * 0.6;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   const x = (pageWidth - imgWidth) / 2;
-  const y = (pageHeight - imgHeight) / 2;
 
-  pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+  if (slips.length === 1) {
+    const yTop = (pageHeight / 4) - (imgHeight / 4);
+    pdf.addImage(imgData, 'PNG', x, yTop, imgWidth, imgHeight);
+  } else {
+    // Two slips: one top, one bottom
+    const eachHeight = pageHeight / 2;
+    pdf.addImage(imgData, 'PNG', x, 0, imgWidth, eachHeight);
+  }
 
   const pdfBlob = pdf.output('blob');
   const file = new File([pdfBlob], "Shipping_Slips.pdf", { type: "application/pdf" });
 
-  if (navigator.share) {
-    try {
-      await navigator.share({
-        title: "Shipping Slips - Zardoz",
-        text: "Shipping slips generated by Zardoz By Anas Traders",
-        files: [file],
-      });
-    } catch (err) {
-      console.error("Share failed:", err);
+  if (action === 'share') {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Shipping Slips - Zardoz",
+          text: "Shipping slips generated by Zardoz By Anas Traders",
+          files: [file],
+        });
+      } catch (err) {
+        console.error("Share failed:", err);
+        pdf.save("Shipping_Slips.pdf");
+      }
+    } else {
       pdf.save("Shipping_Slips.pdf");
     }
   } else {
@@ -126,5 +142,6 @@ async function shareSlips() {
   document.getElementById("slipContainer").style.display = "none";
 }
 </script>
+
 </body>
 </html>
