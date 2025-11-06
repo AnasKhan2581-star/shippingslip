@@ -104,7 +104,7 @@ async function printOrShare(action) {
   const pdf = new jsPDF('p', 'pt', 'a4'); // portrait
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth * 0.8;
+  const imgWidth = pageWidth * 0.6;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   const x = (pageWidth - imgWidth) / 2;
 
