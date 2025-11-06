@@ -73,7 +73,7 @@ function generateSlipHTML(slips) {
   let html = '';
   slips.forEach((s) => {
     html += `
-      <div style="width:60%; margin:0 auto; border:1px solid #000; padding:20px; text-align:left; position:relative; height:400px; box-sizing:border-box;">
+      <div style="width:80%; margin:0 auto; border:1px solid #000; padding:20px; text-align:left; position:relative; height:400px; box-sizing:border-box;">
         <span style="position:absolute; top:5px; right:10px; font-size:10px;">${formattedTime}</span>
         <h3 style="text-align:center; margin:0;">Shipping Slip</h3>
         <p><b>Name:</b> ${s.name}</p>
@@ -104,7 +104,7 @@ async function printOrShare(action) {
   const pdf = new jsPDF('p', 'pt', 'a4'); // portrait
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgWidth = pageWidth * 0.6;
+  const imgWidth = pageWidth * 0.8;
   const imgHeight = (canvas.height * imgWidth) / canvas.width;
   const x = (pageWidth - imgWidth) / 2;
 
