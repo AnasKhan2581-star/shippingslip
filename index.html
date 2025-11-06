@@ -1,174 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shipping Slip Generator | Zardoz By Anas Traders</title>
-<style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #f6f7fb;
-    margin: 0;
-    padding: 20px;
-    text-align: center;
-  }
-  .container {
-    background: #fff;
-    padding: 25px;
-    border-radius: 16px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    display: inline-block;
-    text-align: left;
-    max-width: 400px;
-  }
-  h2 {
-    text-align: center;
-    color: #222;
-    font-weight: 600;
-  }
-  label {
-    font-weight: 500;
-    display: block;
-    margin-top: 10px;
-    color: #444;
-  }
-  input, textarea {
-    width: 100%;
-    padding: 10px;
-    margin-top: 6px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-  button {
-    display: block;
-    width: 100%;
-    margin-top: 15px;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    color: white;
-  }
-  .add { background: #2ecc71; }
-  .print { background: #e67e22; }
-  .share { background: #3498db; }
-
-  @media print {
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zardoz Shipping Slip</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
     body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
       margin: 0;
-      padding: 0;
-      background: white;
+      padding: 20px;
     }
-    .no-print { display: none; }
-    .print-slip {
-      width: 60%;
+    .container {
+      max-width: 800px;
       margin: auto;
-      text-align: left;
-      border: 1px solid #000;
-      padding: 25px;
-      border-radius: 12px;
-      box-sizing: border-box;
-      page-break-after: always;
-      position: relative;
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .header {
+    h1 {
       text-align: center;
-      border-bottom: 2px solid #000;
-      padding-bottom: 8px;
-      margin-bottom: 10px;
+      color: #b8860b;
     }
-    .header h1 {
-      font-size: 20px;
-      margin: 0;
-      font-weight: 700;
+    .slip {
+      border: 2px dashed #b8860b;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      background-color: #fffaf0;
     }
-    .header p {
-      margin: 2px 0 0 0;
-      font-size: 13px;
-      font-weight: 500;
+    .share-btn {
+      display: block;
+      width: 100%;
+      background-color: #b8860b;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    @page {
-      size: A4 landscape;
-      margin: 0;
+    .share-btn:hover {
+      background-color: #9a7609;
     }
-  }
-</style>
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Zardoz India Shipping Slip</h1>
 
-<div class="container no-print">
-  <h2>Shipping Slip Generator<br><span style="color:#c0392b">Zardoz By Anas Traders</span></h2>
+    <div id="shippingSlip" class="slip">
+      <p><strong>Order ID:</strong> ZDZ-1001</p>
+      <p><strong>Customer Name:</strong> Aafreen</p>
+      <p><strong>Address:</strong> 22B, Karol Bagh, Delhi</p>
+      <p><strong>Product:</strong> Heavy Zardozi Lehenga</p>
+      <p><strong>Weight:</strong> 3.5 kg</p>
+      <p><strong>Date:</strong> 6 Nov 2025</p>
+    </div>
 
-  <label>Name</label>
-  <input type="text" id="name" placeholder="Enter store name">
+    <button class="share-btn" onclick="shareSlip()">Share as PDF</button>
+  </div>
 
-  <label>Address</label>
-  <textarea id="address" rows="3" placeholder="Enter address"></textarea>
+  <script>
+    async function shareSlip() {
+      const slip = document.getElementById('shippingSlip');
 
-  <label>Mobile Number</label>
-  <input type="text" id="mobile" placeholder="Enter mobile number">
+      // Capture slip as image
+      const canvas = await html2canvas(slip, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
 
-  <button class="add" onclick="addSlip()">➕ Add New Slip</button>
-  <button class="print" onclick="printSlips()">🖨️ Print Slips</button>
-  <button class="share" onclick="shareSlips()">📤 Share Slips</button>
-</div>
+      // Create PDF
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'a4' });
 
-<div id="slipsContainer"></div>
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const ratio = Math.min(pdfWidth / imgProps.width, pdfHeight / imgProps.height);
+      const imgWidth = imgProps.width * ratio;
+      const imgHeight = imgProps.height * ratio;
+      const x = (pdfWidth - imgWidth) / 2;
+      const y = 40;
 
-<script>
-  let slips = [];
+      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
 
-  function addSlip() {
-    const name = document.getElementById('name').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const mobile = document.getElementById('mobile').value.trim();
+      // Save and share PDF
+      const pdfBlob = pdf.output('blob');
+      const pdfFile = new File([pdfBlob], 'Zardoz_Shipping_Slip.pdf', { type: 'application/pdf' });
 
-    if (!name || !address || !mobile) {
-      alert('Please fill all fields!');
-      return;
+      if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+        await navigator.share({
+          title: 'Zardoz India Shipping Slip',
+          text: 'Here is your shipping slip PDF.',
+          files: [pdfFile]
+        });
+      } else {
+        // fallback download
+        pdf.save('Zardoz_Shipping_Slip.pdf');
+        alert('Sharing not supported, PDF downloaded instead.');
+      }
     }
-
-    const slipHTML = `
-      <div class='print-slip'>
-        <div class='header'>
-          <h1>ZARDOZ</h1>
-          <p>By Anas Traders • Fine Zardozi Suits & Lehengas</p>
-        </div>
-        <h3 style='margin-top:0;'>Shipping Slip</h3>
-        <p><strong>Client Name:</strong> ${name}</p>
-        <p><strong>Address:</strong> ${address}</p>
-        <p><strong>Mobile:</strong> ${mobile}</p>
-        <p style='margin-top:20px;font-size:12px;border-top:1px dashed #aaa;padding-top:5px;'>Thank you for shopping with <strong>Zardoz India</strong>. For any queries, contact us on WhatsApp.</p>
-      </div>
-    `;
-
-    slips.push(slipHTML);
-    document.getElementById('slipsContainer').innerHTML = slips.join('');
-    document.getElementById('name').value = '';
-    document.getElementById('address').value = '';
-    document.getElementById('mobile').value = '';
-  }
-
-  function printSlips() {
-    window.print();
-  }
-
-  function shareSlips() {
-    const blob = new Blob([document.getElementById('slipsContainer').innerHTML], { type: 'text/html' });
-    const file = new File([blob], "ShippingSlips.html", { type: "text/html" });
-    if (navigator.share) {
-      navigator.share({
-        title: 'Shipping Slips',
-        text: 'Here are the generated shipping slips from Zardoz.',
-        files: [file],
-      }).catch(console.error);
-    } else {
-      alert('Sharing not supported on this browser.');
-    }
-  }
-</script>
-
+  </script>
 </body>
 </html>
