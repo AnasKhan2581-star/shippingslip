@@ -1,288 +1,141 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Zardoz by Anas Traders — Shipping Slip Generator</title>
-  <style>
-    /* ---- Page and layout ---- */
-    :root{--brand:#b71c1c;--muted:#6b6b6b;--paper-width:21cm;--paper-height:29.7cm}
-    html,body{height:100%;margin:0;font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:#f4f4f4;color:#111}
-    .app{max-width:980px;margin:24px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 6px 24px rgba(10,10,10,0.06)}
-    h1{font-size:18px;margin:0 0 8px}
-    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-    .field{display:flex;flex-direction:column;flex:1;min-width:200px}
-    label{font-size:12px;color:var(--muted);margin-bottom:6px}
-    input[type=text], textarea{font-size:14px;padding:10px;border-radius:8px;border:1px solid #ddd;outline:none}
-    textarea{min-height:78px;resize:vertical}
-    .actions{display:flex;gap:8px;align-items:center}
-    button{background:var(--brand);color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600}
-    button.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}
-    small.note{display:block;color:var(--muted);margin-top:6px}
-
-    /* ---- Slip preview card (designed to print on the upper half of an A4) ---- */
-    #print-area{display:flex;justify-content:center}
-    .slip{width:calc(var(--paper-width) - 20mm);height:14.85cm; /* half of A4 height */
-      background:#fff;border-radius:6px;border:1px solid #e3e3e3;box-shadow:0 4px 12px rgba(0,0,0,0.04);box-sizing:border-box;padding:12mm;position:relative}
-    .header{display:flex;justify-content:space-between;align-items:flex-start}
-    .brand{font-weight:800;font-size:20px;color:var(--brand)}
-    .sub{font-size:12px;color:var(--muted)}
-    .timestamp{font-size:10px;color:#555;text-align:right}
-    .divider{height:1px;background:#eee;margin:12px 0}
-    .to{display:flex;gap:10px}
-    .to .left{flex:1}
-    .meta{font-size:13px}
-    .meta b{display:inline-block;width:90px}
-    .note-block{margin-top:12px;font-size:13px}
-    .footer{position:absolute;bottom:12mm;left:12mm;right:12mm;font-size:11px;color:var(--muted);display:flex;justify-content:space-between}
-
-    /* ---- Utility ---- */
-    .row{display:flex;gap:8px}
-    .center{display:flex;justify-content:center}
-
-    /* ---- Print styling ---- */
-    @page { size: A4 portrait; margin: 10mm }
-    @media print{
-      html,body{height:100%}
-      body *{visibility:hidden}
-      #print-area, #print-area *{visibility:visible}
-      #print-area{position:fixed;top:0;left:0;width:100%;}
-      /* ensure the slip prints at the top half of the page */
-      .slip{height:14.85cm;margin:0;box-shadow:none;border:0;border-radius:0;padding:10mm}
-    }
-
-    /* small responsive tweaks */
-    @media (max-width:720px){.app{margin:12px;padding:12px}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zardoz Shipping Slip - PDF Share & Print</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f8f8f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+  input, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+    font-size: 14px;
+  }
+  button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #222;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  button:hover {
+    background-color: #444;
+  }
+  .slip {
+    display: none;
+    width: 100%;
+    height: 500px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    padding: 20px;
+    position: relative;
+  }
+  .timestamp {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 10px;
+    color: gray;
+  }
+  @media print {
+    body * { visibility: hidden; }
+    .slip, .slip * { visibility: visible; }
+    .slip { position: absolute; top: 0; left: 0; width: 100%; height: 50%; }
+  }
+</style>
 </head>
 <body>
-  <div class="app" role="main">
-    <h1>Zardoz by Anas Traders — Shipping Slip Generator</h1>
-    <p class="sub">Fill the form below and either <strong>Print (Save as PDF)</strong> or <strong>Share</strong>. The slip prints in the upper half of A4.</p>
+<div class="container">
+  <h2>Zardoz Shipping Slip<br><small>by Anas Traders</small></h2>
+  <label>Name</label>
+  <input type="text" id="name">
+  <label>Phone</label>
+  <input type="text" id="phone">
+  <label>Address</label>
+  <textarea id="address" rows="3"></textarea>
+  <button onclick="generateSlip()">Preview Slip</button>
+  <button onclick="sharePDF()">Share as PDF</button>
+  <button onclick="window.print()">Print Slip</button>
 
-    <div class="controls" role="form" aria-labelledby="form-legend">
-      <div class="field">
-        <label for="name">Recipient Name</label>
-        <input id="name" type="text" placeholder="" maxlength="80" />
-      </div>
-      <div class="field">
-        <label for="phone">Phone number</label>
-        <input id="phone" type="text" placeholder="" maxlength="20" inputmode="tel" />
-        <small class="note">Only digits, + and spaces allowed.</small>
-      </div>
-      <div class="field" style="flex-basis:100%">
-        <label for="address">Address</label>
-        <textarea id="address" placeholder=""></textarea>
-      </div>
-    </div>
-
-    <div class="actions">
-      <button id="fillBtn">Preview Slip</button>
-      <button id="printBtn" class="ghost">Print / Save as PDF</button>
-      <button id="shareBtn" class="ghost">Share (image or system share)</button>
-      <button id="downloadBtn" class="ghost">Download PNG</button>
-     
-    </div>
-
-    <hr style="margin:18px 0;border:none;border-top:1px solid #eee" />
-
-    <!-- Print area -->
-    <div id="print-area">
-      <div id="slip" class="slip" aria-label="Shipping slip preview">
-        <div class="header">
-          <div>
-            <div class="brand">Zardoz <span style="font-weight:600">by Anas Traders</span></div>
-          </div>
-          <div id="ts" class="timestamp">--</div>
-        </div>
-
-        <div class="divider" aria-hidden="true"></div>
-
-        <div class="to">
-          <div class="left meta">
-            <div><b>To:</b> <span id="out-name">Recipient Name</span></div>
-            <div style="margin-top:6px"><b>Phone:</b> <span id="out-phone"></span></div>
-          </div>
-        </div>
-
-        <div class="note-block">
-          <div style="font-weight:700;margin-bottom:6px">Delivery Address</div>
-          <div id="out-address" style="white-space:pre-wrap;color:#222">Recipient address will appear here.</div>
-        </div>
-
-        <div class="footer">
-          <div>Prepared by: <strong>Anas Traders</strong></div>
-          <div>Contact: <span>+91 11 1234 5678</span></div>
-        </div>
-      </div>
-    </div>
-
-    <p style="margin-top:12px;color:var(--muted);font-size:13px">Notes: 1) Use <strong>Print</strong> then choose "Save as PDF" to export as PDF. 2) The <strong>Share</strong> button attempts to share an image file — some browsers may allow sharing PDF files directly (mobile browsers). If your browser doesn't support sharing files, use Print &rarr; Save as PDF instead.</p>
-
+  <div class="slip" id="slip">
+    <div class="timestamp" id="timestamp"></div>
+    <h3>Zardoz by Anas Traders</h3>
+    <p><strong>Name:</strong> <span id="sName"></span></p>
+    <p><strong>Phone:</strong> <span id="sPhone"></span></p>
+    <p><strong>Address:</strong><br><span id="sAddress"></span></p>
   </div>
+</div>
 
-  <script>
-    (function(){
-      // Elements
-      const nameInput = document.getElementById('name');
-      const phoneInput = document.getElementById('phone');
-      const addrInput = document.getElementById('address');
-      const fillBtn = document.getElementById('fillBtn');
-      const printBtn = document.getElementById('printBtn');
-      const shareBtn = document.getElementById('shareBtn');
-      const downloadBtn = document.getElementById('downloadBtn');
-      const outName = document.getElementById('out-name');
-      const outPhone = document.getElementById('out-phone');
-      const outAddress = document.getElementById('out-address');
-      const timestamp = document.getElementById('ts');
-      const slip = document.getElementById('slip');
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+async function generateSlip() {
+  const name = document.getElementById('name').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  if(!name || !phone || !address) return alert('Please fill all fields');
 
-      // Simple validation and sanitization
-      function cleanPhone(v){
-        return v.replace(/[^0-9+\s-]/g,'').trim();
-      }
+  document.getElementById('sName').textContent = name;
+  document.getElementById('sPhone').textContent = phone;
+  document.getElementById('sAddress').textContent = address;
+  document.getElementById('timestamp').textContent = new Date().toLocaleString();
+  document.getElementById('slip').style.display = 'block';
+}
 
-      function updatePreview(){
-        const name = (nameInput.value || '').trim() || 'Recipient Name';
-        const phone = cleanPhone(phoneInput.value) || '+91 98765 43210';
-        const address = (addrInput.value || '').trim() || 'Recipient address will appear here.';
-        outName.textContent = name;
-        outPhone.textContent = phone;
-        outAddress.textContent = address;
-        // timestamp in user's local timezone (usually IST for the user)
-        const now = new Date();
-        // Format: 07 Nov 2025, 20:10 IST
-        const opts = { year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' };
-        const parts = new Intl.DateTimeFormat([], opts).format(now);
-        // We add the timezone abbreviation (best-effort)
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Local';
-        timestamp.textContent = parts + ' — ' + tz;
+async function sharePDF() {
+  const slip = document.getElementById('slip');
+  const { jsPDF } = window.jspdf;
+  const canvas = await html2canvas(slip, { scale: 2 });
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgHeight = pageHeight / 2;
+  pdf.addImage(imgData, 'PNG', 10, 10, pageWidth - 20, imgHeight - 10);
 
-        // persist to localStorage for convenience
-        try{ localStorage.setItem('zardoz_last', JSON.stringify({name,phone,address})) }catch(e){}
-      }
+  const pdfBlob = pdf.output('blob');
+  const file = new File([pdfBlob], `Zardoz_Slip_${Date.now()}.pdf`, { type: 'application/pdf' });
 
-      // Load previous values if any
-      (function load(){
-        try{
-          const raw = localStorage.getItem('zardoz_last');
-          if(raw){const obj = JSON.parse(raw); nameInput.value = obj.name||''; phoneInput.value = obj.phone||''; addrInput.value = obj.address||''}
-        }catch(e){}
-        updatePreview();
-      })();
-
-      fillBtn.addEventListener('click', e=>{
-        updatePreview();
-        // small visual cue
-        fillBtn.textContent = 'Previewed ✓';
-        setTimeout(()=>fillBtn.textContent='Preview Slip',1200);
-      });
-
-      printBtn.addEventListener('click', e=>{
-        updatePreview();
-        // call print - user can pick "Save as PDF"
-        window.print();
-      });
-
-      // Convert DOM node to an image (PNG) using SVG foreignObject trick
-      function nodeToPNG(node, width, height){
-        return new Promise((resolve, reject)=>{
-          try{
-            const xmlns = 'http://www.w3.org/2000/svg';
-            const svg = document.createElementNS(xmlns,'svg');
-            svg.setAttribute('width', width);
-            svg.setAttribute('height', height);
-            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-            const foreign = document.createElementNS(xmlns,'foreignObject');
-            foreign.setAttribute('width','100%');
-            foreign.setAttribute('height','100%');
-
-            // Clone node to avoid mutating original
-            const clone = node.cloneNode(true);
-            // Inline computed styles that are important can be retained by copying the top-level style attribute
-            // We also add a tiny XML namespace attribute so serialization works across browsers
-            clone.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
-            foreign.appendChild(clone);
-            svg.appendChild(foreign);
-
-            const svgStr = new XMLSerializer().serializeToString(svg);
-            const blob = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
-            const url = URL.createObjectURL(blob);
-
-            const img = new Image();
-            img.onload = function(){
-              try{
-                const canvas = document.createElement('canvas');
-                canvas.width = width; canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                // white background
-                ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
-                ctx.drawImage(img,0,0);
-                canvas.toBlob(function(b){ URL.revokeObjectURL(url); resolve(b); }, 'image/png');
-              }catch(err){ URL.revokeObjectURL(url); reject(err) }
-            };
-            img.onerror = function(err){ URL.revokeObjectURL(url); reject(err) };
-            img.src = url;
-          }catch(err){ reject(err) }
-        })
-      }
-
-      // Attempt to share using Web Share API (files) — falls back to downloading a PNG
-      async function shareSlip(){
-        updatePreview();
-        // Calculate rendered pixel size roughly based on A4 at 96dpi: 210mm x 297mm -> 794 x 1123 px. Half height -> 561px
-        const dpi = 96; // browser default
-        const mmToPx = mm => Math.round(mm/25.4*dpi);
-        const widthPx = mmToPx(210 - 20); // page width minus margins
-        const heightPx = mmToPx(148.5 - 0); // half page
-        try{
-          const blob = await nodeToPNG(slip, widthPx, heightPx);
-          const file = new File([blob], 'zardoz-slip.png', {type:'image/png'});
-
-          if(navigator.canShare && navigator.canShare({files:[file]})){
-            await navigator.share({files:[file],title:'Zardoz shipping slip',text:'Shipping slip from Zardoz by Anas Traders'});
-            return;
-          }
-          // fallback: try navigator.share with url/data
-          if(navigator.share){
-            const url = URL.createObjectURL(blob);
-            await navigator.share({title:'Zardoz shipping slip',text:'Shipping slip from Zardoz by Anas Traders',url});
-            URL.revokeObjectURL(url);
-            return;
-          }
-
-          // final fallback: trigger download
-          const dlUrl = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = dlUrl; a.download = 'zardoz-slip.png'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(dlUrl);
-        }catch(err){
-          console.error(err);
-          alert('Sharing is not supported in this browser. Use Print → Save as PDF, or use the Download button.');
-        }
-      }
-
-      shareBtn.addEventListener('click', e=>{ shareSlip() });
-
-      // Download direct PNG
-      downloadBtn.addEventListener('click', async ()=>{
-        updatePreview();
-        const dpi = 96; const mmToPx = mm => Math.round(mm/25.4*dpi);
-        const widthPx = mmToPx(210 - 20);
-        const heightPx = mmToPx(148.5 - 0);
-        try{
-          const blob = await nodeToPNG(slip, widthPx, heightPx);
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download='zardoz-slip.png'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        }catch(e){ console.error(e); alert('Failed to generate image — use Print → Save as PDF as fallback.') }
-      });
-
-      // small usability: update preview live for phone input
-      phoneInput.addEventListener('input', ()=>{ phoneInput.value = cleanPhone(phoneInput.value); });
-
-      // pressing Enter on any field triggers preview
-      [nameInput, phoneInput, addrInput].forEach(el=>el.addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); updatePreview(); fillBtn.classList.add('active'); setTimeout(()=>fillBtn.classList.remove('active'),400)}}));
-
-    })();
-  </script>
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({ files: [file], title: 'Zardoz Shipping Slip', text: 'Here is your shipping slip PDF.' });
+  } else {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(file);
+    link.download = file.name;
+    link.click();
+  }
+}
+</script>
 </body>
 </html>
