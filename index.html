@@ -90,10 +90,12 @@
 
   <div class="slip" id="slip">
     <div class="timestamp" id="timestamp"></div>
-    <h3>Zardoz by Anas Traders</h3>
+    
     <p><strong>Name:</strong> <span id="sName"></span></p>
     <p><strong>Phone:</strong> <span id="sPhone"></span></p>
     <p><strong>Address:</strong><br><span id="sAddress"></span></p>
+    <p> From:-</p>
+    <h5>Zardoz by Anas Traders</h5>
   </div>
 </div>
 
@@ -122,7 +124,7 @@ async function sharePDF() {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const imgHeight = pageHeight / 2;
-  pdf.addImage(imgData, 'PNG', 10, 10, pageWidth - 20, imgHeight - 10);
+  pdf.addImage(imgData, 'PNG', 10, 10, pageWidth - 20, imgHeight - 1);
 
   const pdfBlob = pdf.output('blob');
   const file = new File([pdfBlob], `Zardoz_Slip_${Date.now()}.pdf`, { type: 'application/pdf' });
