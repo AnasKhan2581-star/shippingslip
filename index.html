@@ -9,6 +9,7 @@ body {
   margin: 0;
   padding: 20px;
   background: #f5f5f5;
+  font-size: 18px;
 }
 .container {
   background: #fff;
@@ -18,23 +19,24 @@ body {
   margin: 20px auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
-label { font-weight: bold; }
+label { font-weight: bold; font-size: 18px; }
 input, textarea {
   width: 100%;
   margin: 6px 0 15px 0;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 16px;
+  font-size: 18px;
 }
 button {
   background: black;
   color: white;
-  padding: 10px 15px;
+  padding: 12px 18px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   margin-right: 10px;
+  font-size: 18px;
 }
 button:hover { background: #333; }
 #slip {
@@ -43,12 +45,14 @@ button:hover { background: #333; }
   height: 50vh; /* upper half of A4 */
   position: relative;
   box-sizing: border-box;
+  font-size: 18px;
+  line-height: 1.6;
 }
 .timestamp {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 12px;
+  font-size: 14px;
   color: gray;
 }
 </style>
@@ -56,7 +60,7 @@ button:hover { background: #333; }
 <body>
 
 <div class="container">
-  <h2>Shipping Slip Generator</h2>
+  <h2 style="font-size:22px;">Shipping Slip Generator</h2>
   <label>Name:</label>
   <input type="text" id="name" placeholder="Enter recipient name">
 
@@ -89,7 +93,7 @@ function generateSlip() {
   const slip = document.getElementById("slip");
   slip.innerHTML = `
     <div class='timestamp'>${timestamp}</div>
-    <h3>Shipping Slip</h3>
+    <h3 style="font-size:22px;">Shipping Slip</h3>
     <p><strong>Name:</strong> ${name}</p>
     <p><strong>Address:</strong><br>${address.replace(/\n/g, "<br>")}</p>
     <p><strong>Phone:</strong> ${number}</p>
