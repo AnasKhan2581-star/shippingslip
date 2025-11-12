@@ -1,292 +1,131 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Zardoz — Shipping Slip (Share PDF & Print)</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipping Slip - Zardoz</title>
 <style>
-  :root{
-    --brand:#b71c1c;
-    --muted:#666;
-    --page-width-mm:210;
-    --page-height-mm:297;
-    --content-width-mm:180; /* content width centered on page */
-    --content-top-margin-mm:10; /* top margin in PDF */
-  }
-
-  /* App UI */
-  body{font-family: Inter, system-ui, -apple-system, Roboto, Arial; margin:0;background:#f5f5f6;color:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
-  .card{width:980px;max-width:980px;background:#fff;border-radius:10px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,0.06)}
-  h1{margin:0;font-size:18px}
-  .form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
-  .full{grid-column:1/-1}
-  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-  input[type=text], textarea{padding:10px;border-radius:8px;border:1px solid #ddd;font-size:14px;outline:none;width:100%}
-  textarea{min-height:84px;resize:vertical}
-  .buttons{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
-  button{padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:700}
-  .primary{background:var(--brand);color:#fff}
-  .ghost{background:transparent;border:1px solid var(--brand);color:var(--brand)}
-  small.note{color:var(--muted);display:block;margin-top:6px}
-
-  /* Preview area (what gets converted) */
-  #previewWrap{display:flex;justify-content:center;margin-top:18px}
-  /* Slip visual on screen - we keep it plain (no border) */
-  .slip {
-    width: calc(var(--content-width-mm) * 3.78px); /* quick visual scale on screen (approx mm->px) */
-    max-width:100%;
-    background:#fff;
-    padding:18px;
-    box-sizing:border-box;
-    position:relative;
-    color:#111;
-  }
-  .ts{position:absolute;right:16px;top:10px;font-size:11px;color:var(--muted)}
-  .title{font-weight:800;font-size:18px;margin-bottom:8px}
-  .line{height:1px;background:#eee;margin:12px 0}
-  .meta{font-size:14px}
-  .meta b{display:inline-block;width:74px}
-  .from{position:absolute;bottom:12px;left:18px;font-size:13px;color:#111}
-
-  /* Print rules - show only slip centered in upper half */
-  @media print{
-    @page { size: A4 portrait; margin: 0 } /* allow page-level control; user print dialog may override */
-    html,body{height:100%;margin:0}
-    body *{visibility:hidden}
-    #printTarget, #printTarget *{visibility:visible}
-    /* place slip centered horizontally and in upper half */
-    #printTarget{position:fixed;left:0;right:0;top:0;height:50vh;display:flex;align-items:flex-start;justify-content:center}
-    #printTarget .slip{width:calc(var(--content-width-mm) * 3.78px);padding:12mm 10mm 18mm 10mm;box-sizing:border-box;border-radius:0}
-  }
-
-  /* small screens */
-  @media (max-width:720px){
-    .card{padding:12px}
-    .form{grid-template-columns:1fr}
-  }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f5f5f5;
+}
+.container {
+  background: #fff;
+  padding: 20px;
+  width: 90%;
+  max-width: 700px;
+  margin: 20px auto;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+label { font-weight: bold; }
+input, textarea {
+  width: 100%;
+  margin: 6px 0 15px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+button {
+  background: black;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+button:hover { background: #333; }
+#slip {
+  padding: 30px;
+  background: white;
+  height: 50vh; /* upper half of A4 */
+  position: relative;
+  box-sizing: border-box;
+}
+.timestamp {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12px;
+  color: gray;
+}
 </style>
 </head>
 <body>
 
-<div class="card" role="main" aria-label="Zardoz shipping slip generator">
-  <h1>Zardoz — Shipping Slip Generator</h1>
-  <p style="margin:6px 0 0;color:var(--muted);font-size:13px">Fill details below and tap <strong>Share as PDF</strong> to open your phone's share menu, or choose <strong>Print</strong>.</p>
+<div class="container">
+  <h2>Shipping Slip Generator</h2>
+  <label>Name:</label>
+  <input type="text" id="name" placeholder="Enter recipient name">
 
-  <div class="form" role="form" aria-labelledby="formLabel">
-    <div>
-      <label for="name">Recipient Name</label>
-      <input id="name" type="text" autocomplete="name" />
-    </div>
+  <label>Address:</label>
+  <textarea id="address" rows="4" placeholder="Enter recipient address"></textarea>
 
-    <div>
-      <label for="phone">Phone number</label>
-      <input id="phone" type="text" inputmode="tel" />
-    </div>
+  <label>Phone Number:</label>
+  <input type="text" id="number" placeholder="Enter phone number">
 
-    <div class="full">
-      <label for="address">Address</label>
-      <textarea id="address" spellcheck="false"></textarea>
-    </div>
-  </div>
+  <button onclick="generateSlip()">Generate Slip</button>
+  <button onclick="sharePDF()">Share as PDF</button>
+  <button onclick="window.print()">Print Slip</button>
 
-  <div class="buttons">
-    <button id="previewBtn" class="primary">Preview</button>
-    <button id="shareBtn" class="ghost">Share as PDF</button>
-    <button id="printBtn" class="ghost">Print</button>
-    <button id="downloadBtn" class="ghost">Download PDF</button>
-    <small class="note">Timestamp appears top-right of the slip. No placeholder text — fields are blank and ready.</small>
-  </div>
-
-  <div id="previewWrap">
-    <!-- This is the element we render and turn into PDF. The size on screen is approximate; PDF creation uses mm math -->
-    <div id="printTarget">
-      <div id="slip" class="slip" role="region" aria-label="Shipping slip preview" style="display:none;">
-        <div class="ts" id="ts">--</div>
-        <div class="title">Shipping Slip</div>
-        <div class="line" aria-hidden="true"></div>
-
-        <div class="meta"><div><b>Name:</b> <span id="outName"></span></div>
-        <div style="margin-top:8px"><b>Phone:</b> <span id="outPhone"></span></div></div>
-
-        <div style="margin-top:12px;font-size:14px"><b>Address:</b>
-          <div id="outAddress" style="white-space:pre-wrap;margin-top:6px"></div>
-        </div>
-
-        <div class="from">From: Zardoz by Anas Traders</div>
-      </div>
-    </div>
-  </div>
+  <div id="slip" style="display:none;"></div>
 </div>
 
-<!-- html2canvas and jsPDF via CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-(function(){
-  // Elements
-  const nameEl = document.getElementById('name');
-  const phoneEl = document.getElementById('phone');
-  const addressEl = document.getElementById('address');
-  const previewBtn = document.getElementById('previewBtn');
-  const shareBtn = document.getElementById('shareBtn');
-  const printBtn = document.getElementById('printBtn');
-  const downloadBtn = document.getElementById('downloadBtn');
+function generateSlip() {
+  const name = document.getElementById("name").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const number = document.getElementById("number").value.trim();
+  const timestamp = new Date().toLocaleString();
 
-  const slip = document.getElementById('slip');
-  const ts = document.getElementById('ts');
-  const outName = document.getElementById('outName');
-  const outPhone = document.getElementById('outPhone');
-  const outAddress = document.getElementById('outAddress');
-
-  // PDF layout config (mm)
-  const PAGE_WIDTH_MM = 210;
-  const PAGE_HEIGHT_MM = 297;
-  const CONTENT_WIDTH_MM = 180;      // content width centered on A4
-  const TOP_MARGIN_MM = 10;         // top margin from page top (so slip sits in upper half)
-
-  function updatePreview(){
-    const name = nameEl.value.trim();
-    const phone = phoneEl.value.trim();
-    const address = addressEl.value.trim();
-    if(!name || !phone || !address){
-      // still allow preview, but show what's filled
-    }
-    outName.textContent = name || '';
-    outPhone.textContent = phone || '';
-    outAddress.textContent = address || '';
-    // timestamp in user's local timezone
-    const now = new Date();
-    ts.textContent = now.toLocaleString();
-    slip.style.display = 'block';
-    // ensure the slip's visual sizing is updated (not critical for PDF)
+  if(!name || !address || !number) {
+    alert("Please fill all fields.");
+    return;
   }
 
-  previewBtn.addEventListener('click', e=>{
-    updatePreview();
-    previewBtn.textContent = 'Previewed ✓';
-    setTimeout(()=> previewBtn.textContent = 'Preview', 1100);
-  });
+  const slip = document.getElementById("slip");
+  slip.innerHTML = `
+    <div class='timestamp'>${timestamp}</div>
+    <h3>Shipping Slip</h3>
+    <p><strong>Name:</strong> ${name}</p>
+    <p><strong>Address:</strong><br>${address.replace(/\n/g, "<br>")}</p>
+    <p><strong>Phone:</strong> ${number}</p>
+    <br><br><p style="text-align:right;">From: <b>Zardoz by Anas Traders</b></p>
+  `;
+  slip.style.display = "block";
+}
 
-  // Convert the slip element to a PDF properly scaled for A4 upper half centered
-  async function createPdfBlob(){
-    updatePreview();
+function sharePDF() {
+  const slip = document.getElementById("slip");
+  if (slip.style.display === "none") {
+    alert("Please generate the slip first.");
+    return;
+  }
 
-    // Force slip visible and give it padding for crisp rendering
-    slip.style.display = 'block';
+  const opt = {
+    margin:       [10, 10, 10, 10],
+    filename:     'ShippingSlip_Zardoz.pdf',
+    image:        { type: 'jpeg', quality: 1 },
+    html2canvas:  { scale: 3, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
 
-    // Use devicePixelRatio for crisp image; we multiply by 2 for better quality
-    const scale = Math.max(2, (window.devicePixelRatio || 1) * 2);
-
-    // html2canvas render
-    const canvas = await html2canvas(slip, {
-      scale: scale,
-      useCORS: true,
-      backgroundColor: '#ffffff' // white background for PDF
-    });
-
-    // image data
-    const imgData = canvas.toDataURL('image/png');
-
-    // Compute resulting image size in PDF mm so ratio stays correct
-    // We'll set target content width = CONTENT_WIDTH_MM (mm). Image height in mm:
-    const imgWidthPx = canvas.width;
-    const imgHeightPx = canvas.height;
-    const imgHeightMm = (imgHeightPx / imgWidthPx) * CONTENT_WIDTH_MM;
-    const imgWidthMm = CONTENT_WIDTH_MM;
-
-    // Create PDF and add image centered horizontally and placed at TOP_MARGIN_MM
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-
-    const x = (PAGE_WIDTH_MM - imgWidthMm) / 2;
-    const y = TOP_MARGIN_MM;
-
-    // Add image - use method that accepts base64
-    pdf.addImage(imgData, 'PNG', x, y, imgWidthMm, imgHeightMm);
-
+  html2pdf().set(opt).from(slip).toPdf().get('pdf').then(function(pdf) {
     const blob = pdf.output('blob');
-    return { blob, filename: `ZardozSlip_${Date.now()}.pdf` };
-  }
-
-  // Share PDF via Web Share API if possible, otherwise trigger download
-  async function sharePdf(){
-    try{
-      const { blob, filename } = await createPdfBlob();
-      const file = new File([blob], filename, { type: 'application/pdf' });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Zardoz Shipping Slip', text: 'Shipping slip from Zardoz by Anas Traders' });
-        return;
-      }
-
-      // fallback: use navigator.share with object URL when files not supported
-      if (navigator.share) {
-        const url = URL.createObjectURL(blob);
-        try{
-          await navigator.share({ title: 'Zardoz Shipping Slip', text: 'Shipping slip from Zardoz by Anas Traders', url });
-        } finally {
-          URL.revokeObjectURL(url);
-        }
-        return;
-      }
-
-      // last fallback: download
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-
-    }catch(err){
-      console.error(err);
-      alert('Sharing failed. Try "Download" or use the Print button.');
+    const file = new File([blob], 'ShippingSlip_Zardoz.pdf', {type: 'application/pdf'});
+    if (navigator.share) {
+      navigator.share({
+        title: 'Shipping Slip',
+        files: [file]
+      }).catch(err => console.log('Share canceled', err));
+    } else {
+      alert('Sharing not supported on this device.');
     }
-  }
-
-  async function downloadPdf(){
-    try{
-      const { blob, filename } = await createPdfBlob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    }catch(err){
-      console.error(err);
-      alert('Download failed — try Print as fallback.');
-    }
-  }
-
-  // Print: show only slip (CSS @media print handles it) and call print
-  function printSlip(){
-    updatePreview();
-    // small delay to ensure DOM updated & visible
-    setTimeout(()=> window.print(), 200);
-  }
-
-  shareBtn.addEventListener('click', sharePdf);
-  downloadBtn.addEventListener('click', downloadPdf);
-  printBtn.addEventListener('click', printSlip);
-
-  // quick Enter -> preview behaviour
-  [nameEl, phoneEl, addressEl].forEach(el=>{
-    el.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter' && e.shiftKey === false && el.tagName !== 'TEXTAREA'){
-        e.preventDefault();
-        updatePreview();
-      }
-    });
   });
-
-})();
+}
 </script>
 </body>
 </html>
