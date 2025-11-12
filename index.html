@@ -1,32 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Shipping Slip - Zardoz</title>
 <style>
 body {
   font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 20px;
   background: #f5f5f5;
-  font-size: 18px;
+  margin: 0;
+  padding: 15px;
+  font-size: clamp(16px, 2vw, 18px); /* responsive font size */
 }
 .container {
-  background: #fff;
+  background: white;
   padding: 20px;
-  width: 90%;
+  width: 95%;
   max-width: 700px;
-  margin: 20px auto;
+  margin: 15px auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
 }
-label { font-weight: bold; font-size: 18px; }
+h2 {
+  font-size: clamp(20px, 3vw, 24px);
+  margin-bottom: 15px;
+  text-align: center;
+}
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+}
 input, textarea {
   width: 100%;
   margin: 6px 0 15px 0;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 18px;
+  font-size: clamp(16px, 2vw, 18px);
 }
 button {
   background: black;
@@ -35,44 +45,65 @@ button {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-right: 10px;
-  font-size: 18px;
+  margin: 8px 5px 10px 0;
+  font-size: clamp(16px, 2vw, 18px);
+  width: 100%;
+  max-width: 220px;
 }
 button:hover { background: #333; }
+
 #slip {
-  padding: 30px;
   background: white;
-  height: 50vh; /* upper half of A4 */
-  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 20px auto 0 auto;
+  padding: 30px;
   box-sizing: border-box;
-  font-size: 18px;
+  position: relative;
+  font-size: clamp(16px, 2vw, 18px);
   line-height: 1.6;
 }
 .timestamp {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 14px;
+  font-size: clamp(12px, 1.5vw, 14px);
   color: gray;
+}
+
+/* Print View */
+@media print {
+  body { background: white; }
+  .container { box-shadow: none; border: none; }
+  button, input, textarea, label, h2 { display: none !important; }
+  #slip {
+    display: block !important;
+    page-break-inside: avoid;
+    height: 50vh; /* upper half of A4 */
+    margin: 0 auto;
+  }
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h2 style="font-size:22px;">Shipping Slip Generator</h2>
-  <label>Name:</label>
+  <h2>Shipping Slip Generator</h2>
+
+  <label for="name">Name:</label>
   <input type="text" id="name" placeholder="Enter recipient name">
 
-  <label>Address:</label>
+  <label for="address">Address:</label>
   <textarea id="address" rows="4" placeholder="Enter recipient address"></textarea>
 
-  <label>Phone Number:</label>
+  <label for="number">Phone Number:</label>
   <input type="text" id="number" placeholder="Enter phone number">
 
-  <button onclick="generateSlip()">Generate Slip</button>
-  <button onclick="sharePDF()">Share as PDF</button>
-  <button onclick="window.print()">Print Slip</button>
+  <div style="text-align:center;">
+    <button onclick="generateSlip()">Generate Slip</button>
+    <button onclick="sharePDF()">Share as PDF</button>
+    <button onclick="window.print()">Print Slip</button>
+  </div>
 
   <div id="slip" style="display:none;"></div>
 </div>
@@ -92,8 +123,8 @@ function generateSlip() {
 
   const slip = document.getElementById("slip");
   slip.innerHTML = `
-    <div class='timestamp'>${timestamp}</div>
-    <h3 style="font-size:22px;">Shipping Slip</h3>
+    <div class="timestamp">${timestamp}</div>
+    <h3 style="font-size:clamp(20px,3vw,22px);margin-top:0;">Shipping Slip</h3>
     <p><strong>Name:</strong> ${name}</p>
     <p><strong>Address:</strong><br>${address.replace(/\n/g, "<br>")}</p>
     <p><strong>Phone:</strong> ${number}</p>
@@ -110,23 +141,24 @@ function sharePDF() {
   }
 
   const opt = {
-    margin:       [10, 10, 10, 10],
-    filename:     'ShippingSlip_Zardoz.pdf',
-    image:        { type: 'jpeg', quality: 1 },
-    html2canvas:  { scale: 3, useCORS: true },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    margin: 10,
+    filename: 'ShippingSlip_Zardoz.pdf',
+    image: { type: 'jpeg', quality: 1 },
+    html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(slip).toPdf().get('pdf').then(function(pdf) {
+  html2pdf().set(opt).from(slip).toPdf().get('pdf').then(pdf => {
     const blob = pdf.output('blob');
     const file = new File([blob], 'ShippingSlip_Zardoz.pdf', {type: 'application/pdf'});
-    if (navigator.share) {
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         title: 'Shipping Slip',
         files: [file]
       }).catch(err => console.log('Share canceled', err));
     } else {
-      alert('Sharing not supported on this device.');
+      const url = URL.createObjectURL(blob);
+      window.open(url);
     }
   });
 }
