@@ -21,8 +21,8 @@ body {
 }
 label { font-weight: bold; font-size: 18px; }
 input, textarea {
-  width: 90%;
-  margin: 6px 0px 15px 0px;
+  width: 100%;
+  margin: 6px 0 15px 0;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -35,18 +35,18 @@ button {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin: 10px;
+  margin-right: 10px;
   font-size: 18px;
 }
 button:hover { background: #333; }
 #slip {
-  padding: 15px;
+  padding: 30px;
   background: white;
   height: 50vh; /* upper half of A4 */
   position: relative;
   box-sizing: border-box;
-  font-size: 22px;
-  line-height: 1.4;
+  font-size: 18px;
+  line-height: 1.6;
 }
 .timestamp {
   position: absolute;
@@ -70,9 +70,9 @@ button:hover { background: #333; }
   <label>Phone Number:</label>
   <input type="text" id="number" placeholder="Enter phone number">
 
-  <button onclick="generateSlip()">Generate Slip</button> 
-  <button onclick="sharePDF()">Share as PDF</button> 
-  <button onclick="window.print()">Print Slip</button> 
+  <button onclick="generateSlip()">Generate Slip</button>
+  <button onclick="sharePDF()">Share as PDF</button>
+  <button onclick="window.print()">Print Slip</button>
 
   <div id="slip" style="display:none;"></div>
 </div>
