@@ -124,7 +124,7 @@ async function sharePDF() {
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
   const imgHeight = pageHeight / 2;
-  pdf.addImage(imgData, 'PNG', 10, 10, pageWidth - 20, imgHeight);
+  pdf.addImage(imgData, 'PNG', 10, 10, pageWidth - 20, imgHeight - 1);
 
   const pdfBlob = pdf.output('blob');
   const file = new File([pdfBlob], `Zardoz_Slip_${Date.now()}.pdf`, { type: 'application/pdf' });
