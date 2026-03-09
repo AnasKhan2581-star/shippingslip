@@ -2,166 +2,457 @@
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Shipping Slip - Zardoz</title>
+<meta charset="UTF-8">
+<title>Shipping Slip — Zardoz</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
-  margin: 0;
-  padding: 15px;
-  font-size: clamp(16px, 2vw, 18px); /* responsive font size */
-}
-.container {
-  background: white;
-  padding: 20px;
-  width: 95%;
-  max-width: 700px;
-  margin: 15px auto;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  border-radius: 8px;
-}
-h2 {
-  font-size: clamp(20px, 3vw, 24px);
-  margin-bottom: 15px;
-  text-align: center;
-}
-label {
-  font-weight: bold;
-  display: block;
-  margin-top: 10px;
-}
-input, textarea {
-  width: 100%;
-  margin: 6px 0 15px 0;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: clamp(16px, 2vw, 18px);
-}
-button {
-  background: black;
-  color: white;
-  padding: 12px 18px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin: 8px 5px 10px 0;
-  font-size: clamp(16px, 2vw, 18px);
-  width: 100%;
-  max-width: 220px;
-}
-button:hover { background: #333; }
-
-#slip {
-  background: white;
-  width: 100%;
-  max-width: 700px;
-  margin: 20px auto 0 auto;
-  padding: 30px;
-  box-sizing: border-box;
-  position: relative;
-  font-size: clamp(18px, 2vw, 20px);
-  line-height: 1.6;
-}
-.timestamp {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: clamp(12px, 1.5vw, 14px);
-  color: gray;
-}
-
-/* Print View */
-@media print {
-  body { background: white; }
-  .container { box-shadow: none; border: none; }
-  button, input, textarea, label, h2 { display: none !important; }
-  #slip {
-    display: block !important;
-    page-break-inside: avoid;
-    height: 50vh; /* upper half of A4 */
-    margin: 0 auto;
+  :root {
+    --bg: #f0ede8;
+    --surface: #ffffff;
+    --ink: #1a1a1a;
+    --ink-muted: #6b6561;
+    --accent: #c8410a;
+    --border: #d4cfc9;
+    --radius: 6px;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
   }
-}
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 20px 16px 40px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .page-header h1 {
+    font-family: var(--font-mono);
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+  .page-header span {
+    color: var(--accent);
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    font-family: var(--font-mono);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: clamp(16px, 4vw, 28px);
+    max-width: 680px;
+    margin: 0 auto 20px auto;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .form-group { margin-bottom: 18px; }
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  .form-group input,
+  .form-group textarea {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: #faf9f7;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-group input:focus,
+  .form-group textarea:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    white-space: pre-wrap;
+  }
+
+  /* Paper size selector */
+  .size-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .size-option {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: #faf9f7;
+  }
+  .size-option:hover { border-color: #aaa; }
+  .size-option input[type="radio"] { accent-color: var(--accent); }
+  .size-option.active {
+    border-color: var(--accent);
+    background: #fff5f0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .size-label { font-family: var(--font-mono); font-size: 13px; }
+  .size-desc { font-size: 11px; color: var(--ink-muted); }
+
+  /* Buttons */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn {
+    flex: 1 1 140px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.18s;
+    min-width: 120px;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { background: #333; }
+  .btn-danger { background: var(--accent); color: #fff; }
+  .btn-danger:hover { background: #a33408; }
+  .btn-outline {
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--ink); background: #f5f2ed; }
+
+  /* Slip preview */
+  #slip-wrapper {
+    display: none;
+    max-width: 680px;
+    margin: 0 auto 20px auto;
+  }
+  #slip-wrapper h3 {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  #slip {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: clamp(20px, 5vw, 36px);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    position: relative;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .slip-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.5px dashed var(--border);
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .slip-title {
+    font-family: var(--font-mono);
+    font-size: clamp(16px, 3vw, 20px);
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+  }
+  .slip-title span { color: var(--accent); }
+  .slip-timestamp {
+    font-size: 11px;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    text-align: right;
+  }
+
+  .slip-field { margin-bottom: 14px; }
+  .slip-field-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+    margin-bottom: 2px;
+  }
+  .slip-field-value {
+    font-size: clamp(14px, 2vw, 16px);
+    color: var(--ink);
+    font-weight: 500;
+    white-space: pre-wrap;   /* preserve line breaks & indentation */
+    word-break: break-word;
+  }
+
+  .slip-footer {
+    border-top: 1.5px dashed var(--border);
+    padding-top: 14px;
+    margin-top: 18px;
+    font-size: 13px;
+  }
+  .slip-footer-from {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .slip-footer-from .from-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-family: var(--font-mono);
+  }
+  .slip-footer-from .from-value {
+    font-size: clamp(14px, 2vw, 16px);
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--ink);
+  }
+
+  /* ===================== PRINT STYLES ===================== */
+  @media print {
+    @page { margin: 12mm; }
+
+    body {
+      background: white;
+      padding: 0;
+    }
+    .page-header,
+    .card,
+    #slip-wrapper h3,
+    .slip-timestamp { display: none !important; }
+
+    #slip-wrapper { display: block !important; max-width: 100%; margin: 0; }
+    #slip {
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+      padding: 0;
+      font-size: 13pt;
+      line-height: 1.6;
+    }
+
+    /* A4 — default */
+    body.size-a4 #slip { max-height: none; }
+
+    /* A5 — scale down slightly */
+    body.size-a5 #slip { font-size: 11pt; }
+
+    .slip-field-value { white-space: pre-wrap !important; }
+    .slip-top { border-bottom: 1px dashed #bbb; }
+    .slip-footer { border-top: 1px dashed #bbb; }
+  }
 </style>
 </head>
-<body>
+<body class="size-a4">
 
-<div class="container">
-  <h2>Shipping Slip Generator</h2>
+<div class="page-header">
+  <h1>Shipping Slip <span>—</span> Zardoz</h1>
+  <p>Anas Traders · Delhi</p>
+</div>
 
-  <label for="name">Name:</label>
-  <input type="text" id="name" placeholder="Enter recipient name">
+<div class="card">
 
-  <label for="address">Address:</label>
-  <textarea id="address" rows="4" placeholder="Enter recipient address"></textarea>
-
-  <label for="number">Phone Number:</label>
-  <input type="text" id="number" placeholder="Enter phone number">
-
-  <div style="text-align:center;">
-    <button onclick="generateSlip()">Generate Slip</button>
-    <button onclick="sharePDF()">Share as PDF</button>
-    <button onclick="window.print()">Print Slip</button>
+  <div class="form-group">
+    <label>Paper Size</label>
+    <div class="size-row">
+      <label class="size-option active" id="opt-a4">
+        <input type="radio" name="paperSize" value="a4" checked onchange="selectSize(this)">
+        <div>
+          <div class="size-label">A4</div>
+          <div class="size-desc">210 × 297 mm</div>
+        </div>
+      </label>
+      <label class="size-option" id="opt-a5">
+        <input type="radio" name="paperSize" value="a5" onchange="selectSize(this)">
+        <div>
+          <div class="size-label">A5</div>
+          <div class="size-desc">148 × 210 mm</div>
+        </div>
+      </label>
+    </div>
   </div>
 
-  <div id="slip" style="display:none;"></div>
+  <div class="form-group">
+    <label for="name">Recipient Name</label>
+    <input type="text" id="name" placeholder="e.g. Mohammed Rauf">
+  </div>
+
+  <div class="form-group">
+    <label for="address">Delivery Address</label>
+    <textarea id="address" rows="5" placeholder="Paste full address here&#10;Line breaks and indentation will be preserved"></textarea>
+  </div>
+
+  <div class="form-group">
+    <label for="number">Phone Number</label>
+    <input type="tel" id="number" placeholder="+91 98765 43210">
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="generateSlip()">Generate Slip</button>
+    <button class="btn btn-danger" onclick="sharePDF()">Share as PDF</button>
+    <button class="btn btn-outline" onclick="window.print()">Print</button>
+  </div>
+
+</div>
+
+<div id="slip-wrapper">
+  <h3>Preview</h3>
+  <div id="slip"></div>
+  <div style="text-align:center;margin-top:14px;">
+    <button class="btn btn-outline" style="max-width:200px;" onclick="clearSlip()">Clear</button>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-function generateSlip() {
-  const name = document.getElementById("name").value.trim();
-  const address = document.getElementById("address").value.trim();
-  const number = document.getElementById("number").value.trim();
-  const timestamp = new Date().toLocaleString();
+  let currentSize = 'a4';
 
-  if(!name || !address || !number) {
-    alert("Please fill all fields.");
-    return;
+  function selectSize(radio) {
+    currentSize = radio.value;
+    document.body.className = 'size-' + currentSize;
+    document.querySelectorAll('.size-option').forEach(el => el.classList.remove('active'));
+    document.getElementById('opt-' + currentSize).classList.add('active');
   }
 
-  const slip = document.getElementById("slip");
-  slip.innerHTML = `
-    <div class="timestamp">${timestamp}</div>
-    <h3 style="font-size:clamp(20px,3vw,22px);margin-top:0;">Shipping Slip</h3>
-    <p><strong>Name:</strong> ${name}</p>
-    <p><strong>Address:</strong><br>${address.replace(/\n/g, "<br>")}</p>
-    <p><strong>Phone:</strong> ${number}</p>
-    <br><br><p style="text-align:right;">From: <b> Anas Traders ZARDOZ (Delhi)</b></p>
-  `;
-  slip.style.display = "block";
-}
+  function generateSlip() {
+    const name    = document.getElementById("name").value.trim();
+    const address = document.getElementById("address").value;   // keep raw (spaces + newlines)
+    const number  = document.getElementById("number").value.trim();
 
-function sharePDF() {
-  const slip = document.getElementById("slip");
-  if (slip.style.display === "none") {
-    alert("Please generate the slip first.");
-    return;
-  }
-
-  const opt = {
-    margin: 10,
-    filename: 'ShippingSlip_Zardoz.pdf',
-    image: { type: 'jpeg', quality: 1 },
-    html2canvas: { scale: 4, useCORS: true, scrollY: 0 },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-
-  html2pdf().set(opt).from(slip).toPdf().get('pdf').then(pdf => {
-    const blob = pdf.output('blob');
-    const file = new File([blob], 'ShippingSlip_Zardoz.pdf', {type: 'application/pdf'});
-    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        title: 'Shipping Slip',
-        files: [file]
-      }).catch(err => console.log('Share canceled', err));
-    } else {
-      const url = URL.createObjectURL(blob);
-      window.open(url);
+    if (!name || !address.trim() || !number) {
+      alert("Please fill in all fields.");
+      return;
     }
-  });
-}
+
+    const timestamp = new Date().toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+
+    const slip = document.getElementById("slip");
+
+    slip.innerHTML = `
+      <div class="slip-top">
+        <div class="slip-title">Shipping Slip <span>·</span> Zardoz</div>
+        <div class="slip-timestamp">${timestamp}</div>
+      </div>
+
+      <div class="slip-field">
+        <div class="slip-field-label">To</div>
+        <div class="slip-field-value" id="val-name">${escapeHtml(name)}</div>
+      </div>
+
+      <div class="slip-field">
+        <div class="slip-field-label">Address</div>
+        <div class="slip-field-value" id="val-address">${escapeHtml(address)}</div>
+      </div>
+
+      <div class="slip-field">
+        <div class="slip-field-label">Phone</div>
+        <div class="slip-field-value">${escapeHtml(number)}</div>
+      </div>
+
+      <div class="slip-footer">
+        <div class="slip-footer-from">
+          <span class="from-label">From</span>
+          <span class="from-value">Anas Traders ZARDOZ (Delhi)</span>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("slip-wrapper").style.display = "block";
+    slip.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function escapeHtml(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function clearSlip() {
+    document.getElementById("slip").innerHTML = "";
+    document.getElementById("slip-wrapper").style.display = "none";
+  }
+
+  function sharePDF() {
+    const slip = document.getElementById("slip");
+    if (!slip.innerHTML.trim()) {
+      alert("Please generate the slip first.");
+      return;
+    }
+
+    const paperFormat = currentSize === 'a5' ? [148, 210] : 'a4';
+
+    const opt = {
+      margin: currentSize === 'a5' ? 8 : 12,
+      filename: 'ShippingSlip_Zardoz.pdf',
+      image: { type: 'jpeg', quality: 1 },
+      html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+      jsPDF: {
+        unit: currentSize === 'a5' ? 'mm' : 'mm',
+        format: paperFormat,
+        orientation: 'portrait'
+      }
+    };
+
+    html2pdf().set(opt).from(slip).toPdf().get('pdf').then(pdf => {
+      const blob = pdf.output('blob');
+      const file = new File([blob], 'ShippingSlip_Zardoz.pdf', { type: 'application/pdf' });
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ title: 'Shipping Slip', files: [file] })
+          .catch(err => console.log('Share canceled', err));
+      } else {
+        const url = URL.createObjectURL(blob);
+        window.open(url);
+      }
+    });
+  }
 </script>
 </body>
 </html>
